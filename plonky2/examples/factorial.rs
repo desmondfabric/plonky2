@@ -6,6 +6,7 @@ use plonky2::iop::witness::{PartialWitness, WitnessWrite};
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CircuitConfig;
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
+use plonky2::plonk::fabric::InputValue;
 
 /// An example of using Plonky2 to prove a statement of the form
 /// "I know n * (n + 1) * ... * (n + 99)".
@@ -33,8 +34,11 @@ fn main() -> Result<()> {
     let mut pw = PartialWitness::new();
     pw.set_target(initial, F::ONE);
 
+    
     let data = builder.build::<C>();
+    let res = InputValue::prover_test_data(&pw, &data);
     let proof = data.prove(pw)?;
+    println!("{:?}", res);
 
     println!(
         "Factorial starting at {} is {}",
