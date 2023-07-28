@@ -1051,6 +1051,7 @@ impl<F: RichField + Extendable<D>, const D: usize> CircuitBuilder<F, D> {
         );
 
         // Index generator indices by their watched targets.
+        let mut map: HashMap<String, (usize, Vec<usize>)> = HashMap::new();
         let mut generator_indices_by_watches = BTreeMap::new();
         for (i, generator) in self.generators.iter().enumerate() {
             for watch in generator.0.watch_list() {

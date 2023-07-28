@@ -41,7 +41,8 @@ impl ArithmeticGate {
         config.num_routed_wires / wires_per_op
     }
 
-    pub fn wire_ith_multiplicand_0(i: usize) -> usize {
+    pub fn 
+    wire_ith_multiplicand_0(i: usize) -> usize {
         4 * i
     }
     pub fn wire_ith_multiplicand_1(i: usize) -> usize {

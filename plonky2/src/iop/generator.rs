@@ -1,7 +1,10 @@
+
 use alloc::vec;
 use alloc::vec::Vec;
+use core::any::type_name_of_val;
 use core::fmt::Debug;
 use core::marker::PhantomData;
+use std::collections::HashSet;
 
 use crate::field::extension::Extendable;
 use crate::field::types::Field;
@@ -13,9 +16,9 @@ use crate::iop::witness::{PartialWitness, PartitionWitness, Witness, WitnessWrit
 use crate::plonk::circuit_data::{CommonCircuitData, ProverOnlyCircuitData};
 use crate::plonk::config::GenericConfig;
 use crate::util::serialization::{Buffer, IoResult, Read, Write};
-
 /// Given a `PartitionWitness` that has only inputs set, populates the rest of the witness using the
 /// given set of generators.
+///
 pub(crate) fn generate_partial_witness<
     'a,
     F: RichField + Extendable<D>,
@@ -50,6 +53,8 @@ pub(crate) fn generate_partial_witness<
 
     let mut buffer = GeneratedValues::empty();
 
+    let mut types: HashSet<String> = HashSet::new();
+
     // Keep running generators until we fail to make progress.
     while !pending_generator_indices.is_empty() {
         let mut next_pending_generator_indices = Vec::new();
@@ -58,6 +63,10 @@ pub(crate) fn generate_partial_witness<
             if generator_is_expired[generator_idx] {
                 continue;
             }
+            //let generator_type_name = type_name_of_val(&*generators[generator_idx].0.id());
+            let generator = &generators[generator_idx].0;
+            let id = generator.id();
+            types.insert(id);
 
             let finished = generators[generator_idx].0.run(&witness, &mut buffer);
             if finished {
@@ -87,6 +96,8 @@ pub(crate) fn generate_partial_witness<
 
         pending_generator_indices = next_pending_generator_indices;
     }
+
+    println!("Calling run on generator of types: {:?}", types);
 
     assert_eq!(
         remaining_generators, 0,
@@ -227,7 +238,7 @@ pub struct SimpleGeneratorAdapter<
     const D: usize,
 > {
     _phantom: PhantomData<F>,
-    inner: SG,
+    pub inner: SG,
 }
 
 impl<F: RichField + Extendable<D>, SG: SimpleGenerator<F, D>, const D: usize> WitnessGenerator<F, D>

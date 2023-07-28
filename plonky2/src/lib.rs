@@ -3,6 +3,9 @@
 #![allow(clippy::upper_case_acronyms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+
+#![feature(type_name_of_val)]
+
 extern crate alloc;
 
 #[doc(inline)]

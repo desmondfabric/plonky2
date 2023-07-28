@@ -237,7 +237,7 @@ impl<F: RichField + Extendable<D> + Poseidon, const D: usize> SimpleGenerator<F,
     fn run_once(&self, witness: &PartitionWitness<F>, out_buffer: &mut GeneratedValues<F>) {
         let get_local_get_target = |wire_range| ExtensionTarget::from_range(self.row, wire_range);
         let get_local_ext =
-            |wire_range| witness.get_extension_target(get_local_get_target(wire_range));
+            |wire_range| witness.get_extension_target(get_local_get_target(wire_range)); //[v1,v2] -> [x,yi]
 
         let inputs: [_; SPONGE_WIDTH] = (0..SPONGE_WIDTH)
             .map(|i| get_local_ext(PoseidonMdsGate::<F, D>::wires_input(i)))
@@ -246,12 +246,14 @@ impl<F: RichField + Extendable<D> + Poseidon, const D: usize> SimpleGenerator<F,
             .unwrap();
 
         let outputs = F::mds_layer_field(&inputs);
+        // [[x,yi]]
 
         for (i, &out) in outputs.iter().enumerate() {
             out_buffer.set_extension_target(
                 get_local_get_target(PoseidonMdsGate::<F, D>::wires_output(i)),
                 out,
             );
+            // [[target, [x, yi]] -> [BigPrimeField]
         }
     }
 
